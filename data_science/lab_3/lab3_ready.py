@@ -42,7 +42,7 @@ def csvs_to_frame(dir):
 
 user_input = input("wanna download data? (y/n): ")
 if user_input == "y":
-   for i in range(1,28): # y 29
+   for i in range(1,28):
        dwn(i, 2000, 2020)
 
 df = csvs_to_frame('data2/')
@@ -50,7 +50,7 @@ df = csvs_to_frame('data2/')
 #==================================================
 
 class WebApp(server.App):
-    title = "NOOA vizualization"
+    title = "NOAA vizualization"
 
     inputs = [{"type": "dropdown",
                 "label": "Region",
@@ -161,7 +161,11 @@ class WebApp(server.App):
         for i, (year, year_data) in enumerate(data.groupby('Year')):
             plt_obj = year_data.plot(x='Week', y=indicator, label=year, color=color_palette[i], ax=plt_obj)
         plt.legend(title='Year', bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.grid()
+        
         plot = plt_obj.get_figure()
+        plot.set_figwidth(12)
+        plot.set_figheight(8)
         return plot
         
 
