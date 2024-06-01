@@ -27,15 +27,28 @@ def harmonic_with_noise(t, amplitude, frequency, phase=0, noise_mean=0, noise_co
 
 
 # Функція для застосування фільтра до сигналу
+
 def moving_avg(data, window_size):
-    moving_avg = []
     window_size = int(window_size)
+    moving_avg = []
+    half_window = window_size // 2
+
     for i in range(len(data)):
-        if i < window_size:
-            avg = np.mean(data[:i+1])
+        if i < half_window:
+            # Якщо на початку, і немає достатньо елементів зліва
+            left_index = 0
+            right_index = i * 2
+        elif i >= len(data) - half_window:
+            # Якщо в кінці, і немає достатньо елементів справа
+            left_index = len(data) - i
+            right_index = len(data)
         else:
-            avg = np.mean(data[i-window_size+1:i+1])
+            # Якщо в середині, і є достатньо елементів з обох боків
+            left_index = i - half_window
+            right_index = i + half_window 
+        avg = np.mean(data[left_index:right_index])
         moving_avg.append(avg)
+
     return moving_avg
 
 
