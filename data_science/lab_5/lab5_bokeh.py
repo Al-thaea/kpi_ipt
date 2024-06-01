@@ -60,8 +60,8 @@ plot.border_fill_color = "lightgrey"
 harmonic_line = plot.line(t, harmonic(t, init_amplitude, init_frequency, init_phase), line_width=2, color='darkorange', line_dash='dotted', legend_label='Harmonic line')
 # Генерація гармоніки зі шумом
 with_noise_line = plot.line(t, harmonic_with_noise(t, init_amplitude, frequency=init_frequency,
-                                                   phase=init_phase, noise_mean=initial_noise_mean,
-                                                   noise_covariance=initial_noise_covariance,noise=None), 
+                                                   phase=init_phase, noise_mean=init_noise_mean,
+                                                   noise_covariance=init_noise_covariance,noise=None), 
                                                    line_width=2, color='skyblue', legend_label='Signal with noise')
 
 # Застосування  фільтру
@@ -75,8 +75,8 @@ slider_color = 'lightgrey'
 s_amplitude = Slider(title="Amplitude", value=init_amplitude, start=0.1, end=10.0, step=0.1,  bar_color=slider_color)
 s_frequency = Slider(title="Frequency", value=init_frequency, start=0.1, end=10.0, step=0.1,  bar_color=slider_color)
 s_phase = Slider(title="Phase", value=init_phase, start=0.0, end=2 * np.pi, step=0.1, bar_color=slider_color)
-s_noise_mean = Slider(title="Noise Mean", value=initial_noise_mean, start=-1.0, end=1.0, step=0.1, bar_color=slider_color)
-s_noise_covariance = Slider(title="Noise Covariance", value=initial_noise_covariance, start=0.0, end=1.0, step=0.1, bar_color=slider_color)
+s_noise_mean = Slider(title="Noise Mean", value=init_noise_mean, start=-1.0, end=1.0, step=0.1, bar_color=slider_color)
+s_noise_covariance = Slider(title="Noise Covariance", value=init_noise_covariance, start=0.0, end=1.0, step=0.1, bar_color=slider_color)
 s_cutoff_frequency = Slider(title="window_size", value=3, start=1, end=35.0, step=1, bar_color=slider_color)
 
 # Створення чекбоксу для відображення шуму
@@ -95,11 +95,11 @@ def update(attrname, old, new):
     noise_mean = s_noise_mean.value
     noise_covariance = s_noise_covariance.value
 
-    global initial_noise_mean, initial_noise_covariance, noise_g
+    global init_noise_mean, init_noise_covariance, noise_g
     
-    if initial_noise_covariance != noise_covariance or initial_noise_mean != noise_mean:
-        initial_noise_mean = noise_mean
-        initial_noise_covariance = noise_covariance
+    if init_noise_covariance != noise_covariance or init_noise_mean != noise_mean:
+        init_noise_mean = noise_mean
+        init_noise_covariance = noise_covariance
         noise_g = create_noise(t, noise_mean, noise_covariance)
 
 
@@ -152,6 +152,6 @@ curdoc().add_root(layout)
 
 # Запуск сервера Bokeh
 if __name__ == "__main__":
-    with open("lab5_bokeh.py", "w", encoding="utf-8") as f:
-         f.write(__import__("inspect").getsource(sys.modules[__name__]))
+    # with open("lab5_bokeh.py", "w", encoding="utf-8") as f:
+    #      f.write(__import__("inspect").getsource(sys.modules[__name__]))
     subprocess.run(["bokeh", "serve", "--show", "lab5_bokeh.py"])
