@@ -27,15 +27,28 @@ def harmonic_with_noise(t, amplitude, frequency, phase=0, noise_mean=0, noise_co
 
 
 # Функція для застосування фільтра до сигналу
+
 def moving_avg(data, window_size):
-    moving_avg = []
     window_size = int(window_size)
+    moving_avg = []
+    half_window = window_size // 2
+
     for i in range(len(data)):
-        if i < window_size:
-            avg = np.mean(data[:i+1])
+        if i < half_window:
+            # Якщо на початку, і немає достатньо елементів зліва
+            left_index = 0
+            right_index = i * 2
+        elif i >= len(data) - half_window:
+            # Якщо в кінці, і немає достатньо елементів справа
+            left_index = len(data) - i
+            right_index = len(data)
         else:
-            avg = np.mean(data[i-window_size+1:i+1])
+            # Якщо в середині, і є достатньо елементів з обох боків
+            left_index = i - half_window
+            right_index = i + half_window 
+        avg = np.mean(data[left_index:right_index])
         moving_avg.append(avg)
+
     return moving_avg
 
 
@@ -60,8 +73,8 @@ plot.border_fill_color = "lightgrey"
 harmonic_line = plot.line(t, harmonic(t, init_amplitude, init_frequency, init_phase), line_width=2, color='darkorange', line_dash='dotted', legend_label='Harmonic line')
 # Генерація гармоніки зі шумом
 with_noise_line = plot.line(t, harmonic_with_noise(t, init_amplitude, frequency=init_frequency,
-                                                   phase=init_phase, noise_mean=initial_noise_mean,
-                                                   noise_covariance=initial_noise_covariance,noise=None), 
+                                                   phase=init_phase, noise_mean=init_noise_mean,
+                                                   noise_covariance=init_noise_covariance,noise=None), 
                                                    line_width=2, color='skyblue', legend_label='Signal with noise')
 
 # Застосування  фільтру
@@ -75,8 +88,8 @@ slider_color = 'lightgrey'
 s_amplitude = Slider(title="Amplitude", value=init_amplitude, start=0.1, end=10.0, step=0.1,  bar_color=slider_color)
 s_frequency = Slider(title="Frequency", value=init_frequency, start=0.1, end=10.0, step=0.1,  bar_color=slider_color)
 s_phase = Slider(title="Phase", value=init_phase, start=0.0, end=2 * np.pi, step=0.1, bar_color=slider_color)
-s_noise_mean = Slider(title="Noise Mean", value=initial_noise_mean, start=-1.0, end=1.0, step=0.1, bar_color=slider_color)
-s_noise_covariance = Slider(title="Noise Covariance", value=initial_noise_covariance, start=0.0, end=1.0, step=0.1, bar_color=slider_color)
+s_noise_mean = Slider(title="Noise Mean", value=init_noise_mean, start=-1.0, end=1.0, step=0.1, bar_color=slider_color)
+s_noise_covariance = Slider(title="Noise Covariance", value=init_noise_covariance, start=0.0, end=1.0, step=0.1, bar_color=slider_color)
 s_cutoff_frequency = Slider(title="window_size", value=3, start=1, end=35.0, step=1, bar_color=slider_color)
 
 # Створення чекбоксу для відображення шуму
@@ -95,11 +108,11 @@ def update(attrname, old, new):
     noise_mean = s_noise_mean.value
     noise_covariance = s_noise_covariance.value
 
-    global initial_noise_mean, initial_noise_covariance, noise_g
+    global init_noise_mean, init_noise_covariance, noise_g
     
-    if initial_noise_covariance != noise_covariance or initial_noise_mean != noise_mean:
-        initial_noise_mean = noise_mean
-        initial_noise_covariance = noise_covariance
+    if init_noise_covariance != noise_covariance or init_noise_mean != noise_mean:
+        init_noise_mean = noise_mean
+        init_noise_covariance = noise_covariance
         noise_g = create_noise(t, noise_mean, noise_covariance)
 
 
@@ -152,6 +165,6 @@ curdoc().add_root(layout)
 
 # Запуск сервера Bokeh
 if __name__ == "__main__":
-    with open("lab5_bokeh.py", "w", encoding="utf-8") as f:
-         f.write(__import__("inspect").getsource(sys.modules[__name__]))
+    # with open("lab5_bokeh.py", "w", encoding="utf-8") as f:
+    #      f.write(__import__("inspect").getsource(sys.modules[__name__]))
     subprocess.run(["bokeh", "serve", "--show", "lab5_bokeh.py"])
